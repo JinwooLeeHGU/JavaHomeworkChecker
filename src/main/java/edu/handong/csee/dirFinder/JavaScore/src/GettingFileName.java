@@ -8,9 +8,11 @@ public class GettingFileName {
 
 public static void main(String[] args) throws FileNotFoundException{
 	txt1 = new WriteTxt("SECTIONJAVA.txt");
-	getJavaFileName("C:\\Users\\À±È£\\eclipse-workspace\\Vehicle");
+	//put a Directoy path in ""
+	getJavaFileName("");	
 	txt2 = new WriteTxt("SECTIONCLASS.txt");
-	getClassFileName("C:\\Users\\À±È£\\eclipse-workspace\\Vehicle");
+	//put a Directory path in ""
+	getClassFileName("");
 	
 }
 
