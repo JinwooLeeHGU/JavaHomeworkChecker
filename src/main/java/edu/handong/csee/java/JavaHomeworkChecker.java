@@ -63,12 +63,12 @@ public class JavaHomeworkChecker {
         while((studentPath = studentPathListbufReader.readLine()) != null){
             String classdir = "C:\\Users\\21500\\Desktop\\TEMP\\HW2\\edu\\handong\\csee\\java\\hw2";
         	javacCommand = "javac -cp  "+classdir +" "+ studentPath;
-            System.out.println(javacCommand);
+//            System.out.println(javacCommand);
             runJavacProcess(javacCommand);
         	
         	javaCommand = "java -cp " + classFileList.get(idx) + " "+classFileList.get(++idx)+" " + inputParameters.get(0) + " " + inputParameters.get(1);
             System.out.println(javaCommand);
-            runJavaProcess(javaCommand);
+//            runJavaProcess(javaCommand);
         }           
         studentPathListbufReader.close();
         
@@ -84,7 +84,7 @@ public class JavaHomeworkChecker {
 	
 
 	private static void check(InputStream ins, String command) throws Exception {
-    		int idx = 0;
+		int idx = 0;
         String line = null;
         BufferedReader in = new BufferedReader(new InputStreamReader(ins));
         while ((line = in.readLine()) != null) {
