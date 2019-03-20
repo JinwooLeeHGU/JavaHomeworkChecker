@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class JavaHomeworkChecker {
 	static ArrayList<String> outputParameters = new ArrayList<String>(); // 나중에 method로 나누면서 정리하기 
-	final static String unpassSavedPath = "C:\\Users\\21500\\JavaHomeworkCheckerr";
+	final static String unpassSavedPath = "C:\\Users\\21500\\JavaHomeworkChecker";
 	
 	public static void main(String[] args) throws Exception {
 		// Read input file 
