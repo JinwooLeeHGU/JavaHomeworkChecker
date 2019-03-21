@@ -1,25 +1,24 @@
 package edu.handong.csee.java;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 
 
 public class JavaHomeworkChecker {
 	static ArrayList<String> outputParameters = new ArrayList<String>(); // 나중에 method로 나누면서 정리하기 
-	final static String unpassSavedPath = "C:\\Users\\21500\\JavaHomeworkChecker";
-	
+	static String unpassSavedPath;
 	public static void main(String[] args) throws Exception {
+		unpassSavedPath  =args[0];
 		// Read input file 
 		ArrayList<String> inputParameters = new ArrayList<String>();
-		File inputFile = new File("C:\\Users\\21500\\JavaHomeworkChecker\\input.txt");
+		File inputFile = new File(args[1]);
         FileReader inputFileReader = new FileReader(inputFile);
         BufferedReader inputBufReader = new BufferedReader(inputFileReader);
         String line = "";
@@ -31,7 +30,7 @@ public class JavaHomeworkChecker {
 		
         //Read output file
 
-		File outputFile = new File("C:\\Users\\21500\\JavaHomeworkChecker\\output.txt");
+		File outputFile = new File(args[2]);
         FileReader outputFileReader = new FileReader(outputFile);
         BufferedReader outputBufReader = new BufferedReader(outputFileReader);
         line = "";
@@ -42,7 +41,7 @@ public class JavaHomeworkChecker {
         
         //Read class file list
 		ArrayList<String> classFileList = new ArrayList<String>();
-		File classFile = new File("C:\\Users\\21500\\JavaHomeworkChecker\\classfilelist.txt");
+		File classFile = new File(args[3]);
         FileReader classFileReader = new FileReader(classFile);
         BufferedReader classBufReader = new BufferedReader(classFileReader);
         line = "";
@@ -52,23 +51,23 @@ public class JavaHomeworkChecker {
         classBufReader.close();
         
 		// Read student path list
-		File studentPathListfile = new File("C:\\Users\\21500\\JavaHomeworkChecker\\studentpathlist.txt");
+		File studentPathListfile = new File(args[4]);
         FileReader studentPathListfilereader = new FileReader(studentPathListfile);
         BufferedReader studentPathListbufReader = new BufferedReader(studentPathListfilereader);
         String studentPath = "";
         String javacCommand = "";
         String javaCommand = "";	
         int idx = 0;
-
+        
+        //Execute hw program
         while((studentPath = studentPathListbufReader.readLine()) != null){
-            String classdir = "C:\\Users\\21500\\Desktop\\TEMP\\HW2\\edu\\handong\\csee\\java\\hw2";
-        	javacCommand = "javac -cp  "+classdir +" "+ studentPath;
-//            System.out.println(javacCommand);
+        	javacCommand = "javac -cp  "+cutClasspath(studentPath) +" "+ studentPath; //if we execute this code, this code will modify original class file.
+            System.out.println(javacCommand);
             runJavacProcess(javacCommand);
         	
         	javaCommand = "java -cp " + classFileList.get(idx) + " "+classFileList.get(++idx)+" " + inputParameters.get(0) + " " + inputParameters.get(1);
             System.out.println(javaCommand);
-//            runJavaProcess(javaCommand);
+            runJavaProcess(javaCommand);
         }           
         studentPathListbufReader.close();
         
@@ -82,7 +81,15 @@ public class JavaHomeworkChecker {
 //		runProcess("java edu/handong/csee/java/hw2/CalculatorForFourArithmeticOperators 12 12");
 	}
 	
-
+	private static String cutClasspath(String classdir)
+	{
+		String[] classdirs = classdir.split(" ");
+		int lastslash = classdirs[0].lastIndexOf('\\');
+		classdirs[0]=classdirs[0].substring(0, lastslash-1);
+//		System.out.println(classdirs[0]);
+		return classdirs[0];
+		
+	}
 	private static void check(InputStream ins, String command) throws Exception {
 		int idx = 0;
         String line = null;
