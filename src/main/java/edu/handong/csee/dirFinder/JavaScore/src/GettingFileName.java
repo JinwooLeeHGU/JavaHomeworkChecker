@@ -7,12 +7,11 @@ public class GettingFileName {
 	static WriteTxt txt2;
 
 public static void main(String[] args) throws FileNotFoundException{
+	System.out.println("Input Directory path: ");
 	txt1 = new WriteTxt("SECTIONJAVA.txt");
-	//put a Directoy path in ""
-	getJavaFileName("");	
+	getJavaFileName(args[0]);	
 	txt2 = new WriteTxt("SECTIONCLASS.txt");
-	//put a Directory path in ""
-	getClassFileName("");
+	getClassFileName(args[0]);
 	
 }
 
