@@ -1,19 +1,22 @@
+package edu.handong.csee.java;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 public class GettingFileName {
 	static WriteTxt txt1;
 	static WriteTxt txt2;
 
-public static void main(String[] args) throws FileNotFoundException{
-	System.out.println("Input Directory path: ");
-	txt1 = new WriteTxt("SECTIONJAVA.txt");
-	getJavaFileName(args[0]);	
-	txt2 = new WriteTxt("SECTIONCLASS.txt");
-	getClassFileName(args[0]);
-	
-}
+//public static void main(String[] args) throws FileNotFoundException{
+//	System.out.println("Input Directory path: ");
+//	txt1 = new WriteTxt("SECTIONJAVA.txt");
+//	getJavaFileName(args[0]);	
+//	txt2 = new WriteTxt("SECTIONCLASS.txt");
+//	getClassFileName(args[0]);
+//	
+//}
 
 public static void getJavaFileName(String path) {
 	File folder = new File(path);

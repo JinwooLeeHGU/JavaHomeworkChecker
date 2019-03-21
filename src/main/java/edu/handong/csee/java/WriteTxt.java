@@ -1,3 +1,4 @@
+package edu.handong.csee.java;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
