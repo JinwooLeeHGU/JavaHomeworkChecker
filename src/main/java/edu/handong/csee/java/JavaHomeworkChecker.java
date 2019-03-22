@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 
 public class JavaHomeworkChecker {
-	static ArrayList<String> outputParameters = new ArrayList<String>(); // ³ªÁß¿¡ method·Î ³ª´©¸é¼­ Á¤¸®ÇÏ±â 
+	static ArrayList<String> outputParameters = new ArrayList<String>(); // ë‚˜ì¤‘ì— methodë¡œ ë‚˜ëˆ„ë©´ì„œ ì •ë¦¬í•˜ê¸° 
 	static String unpassSavedPath;
 	public static void main(String[] args) throws Exception {
 		unpassSavedPath  =args[0];
@@ -25,7 +25,7 @@ public class JavaHomeworkChecker {
         while((line = inputBufReader.readLine()) != null){
         		inputParameters.add(line);
         }
-        //.readLine()Àº ³¡¿¡ °³Çà¹®ÀÚ¸¦ ÀĞÁö ¾Ê´Â´Ù.            
+        //.readLine()ì€ ëì— ê°œí–‰ë¬¸ìë¥¼ ì½ì§€ ì•ŠëŠ”ë‹¤.            
         inputBufReader.close();
 		
         //Read output file
@@ -73,7 +73,7 @@ public class JavaHomeworkChecker {
         
         
 
-//		txt file read -> ÇÑÁÙ ÇÑÁÙ ÀĞ¾î¿Í¼­ AbsSrcPath¿¡ ³Ö±â 
+//		txt file read -> í•œì¤„ í•œì¤„ ì½ì–´ì™€ì„œ AbsSrcPathì— ë„£ê¸° 
 //		String AbsSrcPath = "/Users/eunjiwon/Desktop/HW2/edu/handong/csee/java/hw2/CalculatorForFourArithmeticOperators.java /Users/eunjiwon/Desktop/HW2/edu/handong/csee/java/hw2/Calculator.java";
 //		String javacCommand = "javac -d . " + AbsSrcPath;
 		
@@ -98,7 +98,7 @@ public class JavaHomeworkChecker {
     			System.out.println(line);
             if(!line.equals(outputParameters.get(idx++))) {
             	System.out.println("unpassed");
-            		// string ³Ñ±â±â  
+            		// string ë„˜ê¸°ê¸°  
             		StoreUnpassed(command, unpassSavedPath);
             		break;
             }
@@ -117,7 +117,7 @@ public class JavaHomeworkChecker {
         check(pro.getErrorStream(), command);
         pro.waitFor();
         if(pro.exitValue() == 1) {
-        		//string ³Ñ±â±â 
+        		//string ë„˜ê¸°ê¸° 
         		StoreUnpassed(command, unpassSavedPath);
         }
         
