@@ -2,6 +2,7 @@ package edu.handong.csee.java;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,123 +13,142 @@ import java.util.ArrayList;
 
 
 public class JavaHomeworkChecker {
-	static ArrayList<String> outputParameters = new ArrayList<String>(); // 나중에 method로 나누면서 정리하기 
-	static String unpassSavedPath;
+	String unpassSavedPath; // 0
+	ArrayList<String> testInputList; // 1
+	ArrayList<String> outputList; // 2
+	ArrayList<String> javaFileList; // 3
+	String fullyQualifiedClassNameThatContainsMainMethod; // 4	
+	ArrayList<String> studentPathList = new ArrayList<String>(); // 5
+	String projectRootFolderName; // 6
+
+	/**
+	 * @param args  0: csv파일 저장되는 경로,
+	 *              1: test input 값이 저장된 파일, 
+	 *              2: input에 대한 output값이 저장된 파일 
+	 *              3: 컴파일 해야 할 파일의 목록 
+	 *              4: 실행해야 할 fully qualified class name
+	 *              5: 학생들 폴더 목록
+	 *              6: 프로젝트 root 폴더 이름 e.g., HW2
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
-		unpassSavedPath  =args[0];
-		// Read input file 
-		ArrayList<String> inputParameters = new ArrayList<String>();
-		File inputFile = new File(args[1]);
-        FileReader inputFileReader = new FileReader(inputFile);
-        BufferedReader inputBufReader = new BufferedReader(inputFileReader);
-        String line = "";
-        while((line = inputBufReader.readLine()) != null){
-        		inputParameters.add(line);
-        }
-        //.readLine()은 끝에 개행문자를 읽지 않는다.            
-        inputBufReader.close();
-		
-        //Read output file
 
-		File outputFile = new File(args[2]);
-        FileReader outputFileReader = new FileReader(outputFile);
-        BufferedReader outputBufReader = new BufferedReader(outputFileReader);
-        line = "";
-        while((line = outputBufReader.readLine()) != null){
-        		outputParameters.add(line);
-        }        
-        inputBufReader.close();
-        
-        //Read class file list
-		ArrayList<String> classFileList = new ArrayList<String>();
-		File classFile = new File(args[3]);
-        FileReader classFileReader = new FileReader(classFile);
-        BufferedReader classBufReader = new BufferedReader(classFileReader);
-        line = "";
-        while((line = classBufReader.readLine()) != null){
-        		classFileList.add(line);
-        }        
-        classBufReader.close();
-        
-		// Read student path list
-		File studentPathListfile = new File(args[4]);
-        FileReader studentPathListfilereader = new FileReader(studentPathListfile);
-        BufferedReader studentPathListbufReader = new BufferedReader(studentPathListfilereader);
-        String studentPath = "";
-        String javacCommand = "";
-        String javaCommand = "";	
-        int idx = 0;
-        
-        //Execute hw program
-        while((studentPath = studentPathListbufReader.readLine()) != null){
-        	javacCommand = "javac -cp  "+cutClasspath(studentPath) +" "+ studentPath; //if we execute this code, this code will modify original class file.
-            System.out.println(javacCommand);
-            runJavacProcess(javacCommand);
-        	
-        	javaCommand = "java -cp " + classFileList.get(idx) + " "+classFileList.get(++idx)+" " + inputParameters.get(0) + " " + inputParameters.get(1);
-            System.out.println(javaCommand);
-            runJavaProcess(javaCommand);
-        }           
-        studentPathListbufReader.close();
-        
-        
+		JavaHomeworkChecker checker = new JavaHomeworkChecker();
+		checker.run(args);
 
-//		txt file read -> 한줄 한줄 읽어와서 AbsSrcPath에 넣기 
-//		String AbsSrcPath = "/Users/eunjiwon/Desktop/HW2/edu/handong/csee/java/hw2/CalculatorForFourArithmeticOperators.java /Users/eunjiwon/Desktop/HW2/edu/handong/csee/java/hw2/Calculator.java";
-//		String javacCommand = "javac -d . " + AbsSrcPath;
-		
-//		runProcess(javacCommand);
-//		runProcess("java edu/handong/csee/java/hw2/CalculatorForFourArithmeticOperators 12 12");
+	}
+
+	public void run(String[] args) throws Exception {
+
+		// (1) Directory path where unpassed.csv file is saved.
+		unpassSavedPath = args[0];
+
+		// (2) Test input file name e.g., input.txt
+		testInputList = readFile(args[1]);
+
+		// (3) Read test output file. e.g., output.txt
+		outputList = readFile(args[2]);
+
+		// (4) java file list for compile
+		javaFileList = readFile(args[3]);
+
+		// (5) Read class file list
+		fullyQualifiedClassNameThatContainsMainMethod = readFile(args[4]).get(0);
+
+		// (6) Read student path list
+		studentPathList = readFile(args[5]);
+
+		// (7) Project root folder name
+		projectRootFolderName = readFile(args[6]).get(0);
+
+		executeProgram();
 	}
 	
-	private static String cutClasspath(String classdir)
-	{
-		String[] classdirs = classdir.split(" ");
-		int lastslash = classdirs[0].lastIndexOf('\\');
-		classdirs[0]=classdirs[0].substring(0, lastslash-1);
-//		System.out.println(classdirs[0]);
-		return classdirs[0];
-		
+	ArrayList<String> readFile(String path) throws Exception{
+
+		ArrayList<String> lines = new ArrayList<String>();
+
+		File inputFile = new File(path);
+		FileReader inputFileReader = new FileReader(inputFile);
+		BufferedReader inputBufReader = new BufferedReader(inputFileReader);
+		String line = "";
+		while((line = inputBufReader.readLine()) != null){
+			lines.add(line);
+		}
+		//.readLine()은 끝에 개행문자를 읽지 않는다.            
+		inputBufReader.close();
+
+		return lines;
+
 	}
-	private static void check(InputStream ins, String command) throws Exception {
+
+
+	void executeProgram() throws Exception{
+
+		//Execute hw program
+		for(String studentPath:studentPathList) {
+			String classpath = studentPath + File.separator + projectRootFolderName;
+			String javaFiles = getJavaFiles();
+			String javacCommand = "javac -cp " + classpath +" "+ javaFiles; //if we execute this code, this code will modify original class file.
+			System.out.println(javacCommand);
+			runJavacProcess(javacCommand);
+
+			for(String testInput: testInputList) {
+				String javaCommand = "java -cp " + classpath + " "+ 
+						fullyQualifiedClassNameThatContainsMainMethod +" " + testInput;
+				System.out.println(javaCommand);
+				runJavaProcess(javaCommand);
+			}
+		}
+	}
+
+	String getJavaFiles() {
+		String strJavaFiles = "";
+		for(String javaFile : javaFileList) {
+			strJavaFiles = strJavaFiles + " " +	javaFile;
+		}
+
+		return strJavaFiles;
+	}
+
+	private void check(InputStream ins, String command) throws Exception {
 		int idx = 0;
-        String line = null;
-        BufferedReader in = new BufferedReader(new InputStreamReader(ins));
-        while ((line = in.readLine()) != null) {
-    			System.out.println(line);
-            if(!line.equals(outputParameters.get(idx++))) {
-            	System.out.println("unpassed");
-            		// string 넘기기  
-            		StoreUnpassed(command, unpassSavedPath);
-            		break;
-            }
-        }
-    }
-    private static void runJavacProcess(String command) throws Exception {
-        Process pro = Runtime.getRuntime().exec(command);
-        pro.waitFor();
-    }
-    
-    
-    
-    private static void runJavaProcess(String command) throws Exception {
-        Process pro = Runtime.getRuntime().exec(command);
-        check(pro.getInputStream(), command);
-        check(pro.getErrorStream(), command);
-        pro.waitFor();
-        if(pro.exitValue() == 1) {
-        		//string 넘기기 
-        		StoreUnpassed(command, unpassSavedPath);
-        }
-        
-//        System.out.println(command + " exitValue() " + pro.exitValue());
-        
-     }
-    
-    public static void StoreUnpassed(String drivepath,String path) throws IOException{
-         FileWriter file = new FileWriter(path+"/unpassed.csv", true); 
-         PrintWriter print_line = new PrintWriter( file );
-         print_line.printf( "%s" + "%n" , drivepath);
-          print_line.close();
-    }
+		String line = null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(ins));
+		while ((line = in.readLine()) != null) {
+			System.out.println(line);
+			if(!line.equals(outputList.get(idx++))) {
+				System.out.println("unpassed");
+				// string 넘기기  
+				StoreUnpassed(command, unpassSavedPath);
+				break;
+			}
+		}
+	}
+
+	private void runJavacProcess(String command) throws Exception {
+		Process pro = Runtime.getRuntime().exec(command);
+		pro.waitFor();
+	}
+
+	private void runJavaProcess(String command) throws Exception {
+		Process pro = Runtime.getRuntime().exec(command);
+		check(pro.getInputStream(), command);
+		check(pro.getErrorStream(), command);
+		pro.waitFor();
+		if(pro.exitValue() == 1) {
+			//string 넘기기 
+			StoreUnpassed(command, unpassSavedPath);
+		}
+
+		//        System.out.println(command + " exitValue() " + pro.exitValue());
+
+	}
+
+	public void StoreUnpassed(String drivepath,String path) throws IOException{
+		FileWriter file = new FileWriter(path+"/unpassed.csv", true); 
+		PrintWriter print_line = new PrintWriter( file );
+		print_line.printf( "%s" + "%n" , drivepath);
+		print_line.close();
+	}
 }
