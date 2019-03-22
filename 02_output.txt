@@ -1,0 +1,5 @@
+SUM: 5
+SUBTRACT: -1
+MULTIPLY: 6
+DIVIDE: 0
+The number of arithmetic operators processed!: 4
