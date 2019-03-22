@@ -3,11 +3,10 @@
 
 <h3>example argument list</h3>
 
-"C:\\Users\\21500\\JavaHomeworkChecker" **args[0]**<br>
-"C:\\Users\\21500\\JavaHomeworkChecker\\input.txt" **args[1]**<br>
-"C:\\Users\\21500\\JavaHomeworkChecker\\output.txt" **args[2]**<br>
-"C:\\Users\\21500\\JavaHomeworkChecker\\classfilelist.txt" **args[3]**<br>
-"C:\\Users\\21500\\JavaHomeworkChecker\\studentpathlist.txt" **args[4]**
+$ gradle distZip
+$ unzip build/distributions/JavaHomeworkChecker.zip -d build/distributions/
+$ build/distributions/JavaHomeworkChecker . 01_input.txt 02_output.txt 03_javafilelist.txt 04_classfileformain.txt 05_studentpathlistMT67.txt 06_proejctrootname.txt
+
 
 <h1>output</h1>
 
