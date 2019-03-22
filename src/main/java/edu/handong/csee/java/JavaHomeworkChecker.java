@@ -120,7 +120,7 @@ public class JavaHomeworkChecker {
 			if(!line.equals(outputList.get(idx++))) {
 				System.out.println("unpassed");
 				// string 넘기기  
-				StoreUnpassed(command, unpassSavedPath);
+				storeUnpassed(command, unpassSavedPath);
 				break;
 			}
 		}
@@ -138,15 +138,12 @@ public class JavaHomeworkChecker {
 		pro.waitFor();
 		if(pro.exitValue() == 1) {
 			//string 넘기기 
-			StoreUnpassed(command, unpassSavedPath);
+			storeUnpassed(command, unpassSavedPath);
 		}
-
-		//        System.out.println(command + " exitValue() " + pro.exitValue());
-
 	}
 
-	public void StoreUnpassed(String drivepath,String path) throws IOException{
-		FileWriter file = new FileWriter(path+"/unpassed.csv", true); 
+	public void storeUnpassed(String drivepath,String path) throws IOException{
+		FileWriter file = new FileWriter(path+"/unpassed.csv", false); 
 		PrintWriter print_line = new PrintWriter( file );
 		print_line.printf( "%s" + "%n" , drivepath);
 		print_line.close();
