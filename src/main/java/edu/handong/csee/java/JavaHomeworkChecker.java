@@ -20,6 +20,8 @@ public class JavaHomeworkChecker {
 	String fullyQualifiedClassNameThatContainsMainMethod; // 4	
 	ArrayList<String> studentPathList = new ArrayList<String>(); // 5
 	String projectRootFolderName; // 6
+	
+	ArrayList<String> evaluationResults;
 
 	/**
 	 * @param args  0: csv파일 저장되는 경로,
@@ -61,7 +63,10 @@ public class JavaHomeworkChecker {
 		// (7) Project root folder name
 		projectRootFolderName = readFile(args[6]).get(0);
 
+		evaluationResults = new ArrayList<String>();
 		executeProgram();
+		
+		saveResultsInCSVFile();
 	}
 	
 	ArrayList<String> readFile(String path) throws Exception{
@@ -120,7 +125,7 @@ public class JavaHomeworkChecker {
 			if(!line.equals(outputList.get(idx++))) {
 				System.out.println("unpassed");
 				// string 넘기기  
-				storeUnpassed(command, unpassSavedPath);
+				storeUnpassed(command);
 				break;
 			}
 		}
@@ -138,14 +143,24 @@ public class JavaHomeworkChecker {
 		pro.waitFor();
 		if(pro.exitValue() == 1) {
 			//string 넘기기 
-			storeUnpassed(command, unpassSavedPath);
+			storeUnpassed(command);
 		}
 	}
 
-	public void storeUnpassed(String drivepath,String path) throws IOException{
-		FileWriter file = new FileWriter(path+"/unpassed.csv", false); 
-		PrintWriter print_line = new PrintWriter( file );
-		print_line.printf( "%s" + "%n" , drivepath);
-		print_line.close();
+	public void storeUnpassed(String drivepath){
+		
+		evaluationResults.add(drivepath);
+		
+	}
+	
+	public void saveResultsInCSVFile()  throws IOException {
+		FileWriter file = new FileWriter(unpassSavedPath+ File.separator + "unpassed.csv", false); 
+		PrintWriter writer = new PrintWriter( file );
+		
+		for(String evaluationResult:evaluationResults) {
+			writer.printf( "%s" + "%n" , evaluationResult);
+		}
+		
+		writer.close();
 	}
 }
