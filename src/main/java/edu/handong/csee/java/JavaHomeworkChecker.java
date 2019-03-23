@@ -92,9 +92,11 @@ public class JavaHomeworkChecker {
 
 		//Execute hw program
 		for(String studentPath:studentPathList) {
-			String classpath = studentPath + File.separator + projectRootFolderName;
-			String javaFiles = getJavaFiles();
-			String javacCommand = "javac -cp " + classpath +" "+ javaFiles; //if we execute this code, this code will modify original class file.
+			
+			String classpath = studentPath + "/" + projectRootFolderName;
+			String javaFiles = getJavaFiles(classpath);
+			String javacCommand = "javac " + javaFiles; //if we execute this code, this code will modify original class file.
+			
 			System.out.println(javacCommand);
 			runJavacProcess(javacCommand);
 
@@ -107,10 +109,10 @@ public class JavaHomeworkChecker {
 		}
 	}
 
-	String getJavaFiles() {
+	String getJavaFiles(String projectRoot) {
 		String strJavaFiles = "";
 		for(String javaFile : javaFileList) {
-			strJavaFiles = strJavaFiles + " " +	javaFile;
+			strJavaFiles = strJavaFiles + " " +	projectRoot + "/" + javaFile;
 		}
 
 		return strJavaFiles;
@@ -123,9 +125,8 @@ public class JavaHomeworkChecker {
 		while ((line = in.readLine()) != null) {
 			System.out.println(line);
 			if(!line.equals(outputList.get(idx++))) {
-				System.out.println("unpassed");
-				// string 넘기기  
-				storeUnpassed(command);
+				System.out.println("%%%%%%%%%%%%%%unpassed");
+				//storeUnpassed(command);
 				break;
 			}
 		}
@@ -133,7 +134,18 @@ public class JavaHomeworkChecker {
 
 	private void runJavacProcess(String command) throws Exception {
 		Process pro = Runtime.getRuntime().exec(command);
+		String line = null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(pro.getErrorStream()));
+		while ((line = in.readLine()) != null) {
+			System.out.println(line);
+		}
+		
 		pro.waitFor();
+		if(pro.exitValue() == 1) {
+			storeUnpassed("COMPILE ERROR " + command);
+		}
+		else
+			System.out.println("Compile successful!! " + pro.exitValue());
 	}
 
 	private void runJavaProcess(String command) throws Exception {
@@ -142,8 +154,7 @@ public class JavaHomeworkChecker {
 		check(pro.getErrorStream(), command);
 		pro.waitFor();
 		if(pro.exitValue() == 1) {
-			//string 넘기기 
-			storeUnpassed(command);
+			storeUnpassed("TEST CASE FAILED " + command);
 		}
 	}
 
