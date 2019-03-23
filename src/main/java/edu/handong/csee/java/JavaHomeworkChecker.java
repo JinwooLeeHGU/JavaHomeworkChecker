@@ -143,9 +143,10 @@ public class JavaHomeworkChecker {
 		pro.waitFor();
 		if(pro.exitValue() >= 1) {
 			storeUnpassed("COMPILE ERROR " + command);
+			System.out.println("EXIT CODE " + pro.exitValue());
 		}
 		else
-			System.out.println("Compile successful!! " + pro.exitValue());
+			System.out.println("Compile successful!! EXIT CODE=" + pro.exitValue());
 	}
 
 	private void runJavaProcess(String command) throws Exception {
