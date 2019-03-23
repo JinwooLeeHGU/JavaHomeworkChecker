@@ -142,7 +142,7 @@ public class JavaHomeworkChecker {
 		
 		pro.waitFor();
 		if(pro.exitValue() >= 1) {
-			storeUnpassed("COMPILE ERROR " + command);
+			storeUnpassed(pro.exitValue() + "COMPILE ERROR " + command);
 			System.out.println("EXIT CODE " + pro.exitValue());
 		}
 		else
@@ -155,7 +155,7 @@ public class JavaHomeworkChecker {
 		check(pro.getErrorStream(), command);
 		pro.waitFor();
 		if(pro.exitValue() >= 1) {
-			storeUnpassed("TEST CASE FAILED " + command);
+			storeUnpassed(pro.exitValue()+ "TEST CASE FAILED " + command);
 		}
 	}
 
