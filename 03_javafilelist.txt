@@ -1,1 +1,1 @@
-HW2\CalculatorForFourArithmeticOperators.java HW2\edu\handong\csee\java\hw2\Calculator.java
+edu/handong/csee/java/hw2/*.java
