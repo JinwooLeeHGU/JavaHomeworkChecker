@@ -141,7 +141,7 @@ public class JavaHomeworkChecker {
 		}
 		
 		pro.waitFor();
-		if(pro.exitValue() == 1) {
+		if(pro.exitValue() >= 1) {
 			storeUnpassed("COMPILE ERROR " + command);
 		}
 		else
@@ -153,7 +153,7 @@ public class JavaHomeworkChecker {
 		check(pro.getInputStream(), command);
 		check(pro.getErrorStream(), command);
 		pro.waitFor();
-		if(pro.exitValue() == 1) {
+		if(pro.exitValue() >= 1) {
 			storeUnpassed("TEST CASE FAILED " + command);
 		}
 	}
