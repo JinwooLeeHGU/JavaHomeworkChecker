@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class JavaHomeworkChecker {
 	String unpassSavedPath; // 0
 	ArrayList<String> testInputList; // 1
-	ArrayList<String> outputList; // 2
+	ArrayList<Output> outputList; // 2
 	ArrayList<String> javaFileList; // 3
 	String fullyQualifiedClassNameThatContainsMainMethod; // 4	
 	ArrayList<String> studentPathList = new ArrayList<String>(); // 5
@@ -48,7 +48,7 @@ public class JavaHomeworkChecker {
 		testInputList = readFile(args[1]);
 
 		// (3) Read test output file. e.g., output.txt
-		outputList = readFile(args[2]);
+		outputList = readOutputFile(args[2]);
 
 		// (4) java file list for compile
 		javaFileList = readFile(args[3]);
@@ -85,6 +85,26 @@ public class JavaHomeworkChecker {
 		return lines;
 
 	}
+	
+	ArrayList<Output> readOutputFile(String path) throws Exception{
+		ArrayList<Output> outputList = new ArrayList<Output>();
+		
+		ArrayList<String> lines = readFile(path);
+		ArrayList<Integer> ouputDividerIndice = new ArrayList<Integer>();
+		
+		for(int i=0; i < lines.size(); i++) {
+			if(lines.get(i).startsWith("%%%%%")) {
+				ouputDividerIndice.add(i);
+			}
+		}
+		
+		for(int i=0; i < ouputDividerIndice.size()-1; i++) {
+			outputList.add(new Output(ouputDividerIndice.get(i),ouputDividerIndice.get(i+1),lines));
+		}
+		
+		return outputList; 
+	}
+
 
 
 	void executeProgram() throws Exception{
@@ -99,11 +119,11 @@ public class JavaHomeworkChecker {
 			System.out.println(javacCommand);
 			runJavacProcess(javacCommand);
 
-			for(String testInput: testInputList) {
+			for(int i=0; i<testInputList.size();i++) {
 				String javaCommand = "java -cp " + classpath + " "+ 
-						fullyQualifiedClassNameThatContainsMainMethod +" " + testInput;
+						fullyQualifiedClassNameThatContainsMainMethod +" " + testInputList.get(i);
 				System.out.println(javaCommand);
-				runJavaProcess(javaCommand);
+				runJavaProcess(javaCommand,i);
 			}
 		}
 	}
@@ -117,13 +137,15 @@ public class JavaHomeworkChecker {
 		return strJavaFiles;
 	}
 
-	private void check(InputStream ins, String command) throws Exception {
+	private void check(InputStream ins, String command,int inputIndex) throws Exception {
 		int idx = 0;
 		String line = null;
 		BufferedReader in = new BufferedReader(new InputStreamReader(ins));
 		while ((line = in.readLine()) != null) {
 			System.out.println(line);
-			if(!line.equals(outputList.get(idx++))) {
+			if(!line.equals(outputList.get(inputIndex).getOutput().get(idx++))) {
+				System.out.println("%%Expected line: " + line);
+				System.out.println("%%Actual line: " + outputList.get(inputIndex).getOutput().get(idx-1));
 				System.out.println("%%%%%%%%%%%%%%unpassed");
 				//storeUnpassed(command);
 				break;
@@ -148,10 +170,10 @@ public class JavaHomeworkChecker {
 			System.out.println("Compile successful!! EXIT CODE=" + pro.exitValue());
 	}
 
-	private void runJavaProcess(String command) throws Exception {
+	private void runJavaProcess(String command,int inputIndex) throws Exception {
 		Process pro = Runtime.getRuntime().exec(command);
-		check(pro.getInputStream(), command);
-		check(pro.getErrorStream(), command);
+		check(pro.getInputStream(), command, inputIndex);
+		check(pro.getErrorStream(), command, inputIndex);
 		pro.waitFor();
 		if(pro.exitValue() >= 1) {
 			storeUnpassed(pro.exitValue()+ "TEST CASE FAILED " + command);
