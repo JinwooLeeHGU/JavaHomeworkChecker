@@ -65,7 +65,7 @@ public class JavaHomeworkChecker {
 		evaluationResults = new ArrayList<String>();
 		executeProgram();
 		
-		saveResultsInCSVFile();
+		saveResultsInCSVFile();	
 	}
 	
 	ArrayList<String> readFile(String path) throws Exception{
@@ -147,7 +147,7 @@ public class JavaHomeworkChecker {
 				System.out.println("%%Expected line: " + line);
 				System.out.println("%%Actual line: " + outputList.get(inputIndex).getOutput().get(idx-1));
 				System.out.println("%%%%%%%%%%%%%%unpassed");
-				//storeUnpassed(command);
+				storeUnpassed("0TESTCASE FAILED " + command);
 				break;
 			}
 		}

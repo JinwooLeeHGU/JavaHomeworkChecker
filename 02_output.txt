@@ -1,5 +1,13 @@
+%%%%% Input 2 3
 SUM: 5
 SUBTRACT: -1
 MULTIPLY: 6
 DIVIDE: 0
 The number of arithmetic operators processed!: 4
+%%%%% Input 5 5
+SUM: 10
+SUBTRACT: 0
+MULTIPLY: 25
+DIVIDE: 1
+The number of arithmetic operators processed!: 4
+%%%%%
