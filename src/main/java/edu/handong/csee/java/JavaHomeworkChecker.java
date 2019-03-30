@@ -141,15 +141,24 @@ public class JavaHomeworkChecker {
 		int idx = 0;
 		String line = null;
 		BufferedReader in = new BufferedReader(new InputStreamReader(ins));
+		checker:
 		while ((line = in.readLine()) != null) {
 			System.out.println(line);
-			if(!line.equals(outputList.get(inputIndex).getOutput().get(idx++))) {
-				System.out.println("%%Expected line: " + line);
-				System.out.println("%%Actual line: " + outputList.get(inputIndex).getOutput().get(idx-1));
-				System.out.println("%%%%%%%%%%%%%%unpassed");
-				storeUnpassed("0TESTCASE FAILED " + command);
-				break;
+			try {
+				if(!line.equals(outputList.get(inputIndex).getOutput().get(idx))) {
+					System.out.println("%%Expected line: " + outputList.get(inputIndex).getOutput().get(idx));
+					//System.out.println("%%Actual line: " + );
+					System.out.println("%%%%%%%%%%%%%%unpassed");
+					storeUnpassed("0TESTCASE FAILED " + command);
+					break checker;
+				}
+				idx++;
+			} catch(IndexOutOfBoundsException e) {
+				// got the correct line but there are unnecessary result lines
+				// System.out.println("Exception: " + line);
+				storeUnpassed("0TESTCASE minor issue unnecessary result lines " + command);
 			}
+			
 		}
 	}
 
