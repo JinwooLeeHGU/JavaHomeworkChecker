@@ -114,7 +114,7 @@ public class JavaHomeworkChecker {
 			
 			String classpath = studentPath + "/" + projectRootFolderName;
 			String javaFiles = getJavaFiles(classpath);
-			String javacCommand = "javac " + javaFiles; //if we execute this code, this code will modify original class file.
+			String javacCommand = "javac -encoding utf-8" + javaFiles; //if we execute this code, this code will modify original class file.
 			
 			System.out.println(javacCommand);
 			runJavacProcess(javacCommand);
