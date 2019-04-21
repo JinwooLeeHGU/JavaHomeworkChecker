@@ -23,13 +23,13 @@ public class JavaHomeworkChecker {
 	ArrayList<String> evaluationResults;
 
 	/**
-	 * @param args  0: csvíŒŒì¼ ì €ì¥ë˜ëŠ” ê²½ë¡œ,
-	 *              1: test input ê°’ì´ ì €ì¥ëœ íŒŒì¼, 
-	 *              2: inputì— ëŒ€í•œ outputê°’ì´ ì €ì¥ëœ íŒŒì¼ 
-	 *              3: ì»´íŒŒì¼ í•´ì•¼ í•  íŒŒì¼ì˜ ëª©ë¡ 
-	 *              4: ì‹¤í–‰í•´ì•¼ í•  fully qualified class name
-	 *              5: í•™ìƒë“¤ í´ë” ëª©ë¡
-	 *              6: í”„ë¡œì íŠ¸ root í´ë” ì´ë¦„ e.g., HW2
+	 * @param args  0: csvÆÄÀÏ ÀúÀåµÇ´Â °æ·Î,
+	 *              1: test input °ªÀÌ ÀúÀåµÈ ÆÄÀÏ, 
+	 *              2: input¿¡ ´ëÇÑ output°ªÀÌ ÀúÀåµÈ ÆÄÀÏ 
+	 *              3: ÄÄÆÄÀÏ ÇØ¾ß ÇÒ ÆÄÀÏÀÇ ¸ñ·Ï 
+	 *              4: ½ÇÇàÇØ¾ß ÇÒ fully qualified class name
+	 *              5: ÇĞ»ıµé Æú´õ ¸ñ·Ï
+	 *              6: ÇÁ·ÎÁ§Æ® root Æú´õ ÀÌ¸§ e.g., HW2
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
@@ -79,7 +79,7 @@ public class JavaHomeworkChecker {
 		while((line = inputBufReader.readLine()) != null){
 			lines.add(line);
 		}
-		//.readLine()ì€ ëì— ê°œí–‰ë¬¸ìë¥¼ ì½ì§€ ì•ŠëŠ”ë‹¤.            
+		//.readLine()Àº ³¡¿¡ °³Çà¹®ÀÚ¸¦ ÀĞÁö ¾Ê´Â´Ù.            
 		inputBufReader.close();
 
 		return lines;
