@@ -105,8 +105,6 @@ public class JavaHomeworkChecker {
 		return outputList; 
 	}
 
-
-
 	void executeProgram() throws Exception{
 
 		//Execute hw program
