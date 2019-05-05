@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import edu.handong.csee.java.datamodel.Student;
+
 
 public class JavaHomeworkChecker {
 	String unpassSavedPath; // 0
@@ -17,9 +19,11 @@ public class JavaHomeworkChecker {
 	ArrayList<Output> outputList; // 2
 	ArrayList<String> javaFileList; // 3
 	String fullyQualifiedClassNameThatContainsMainMethod; // 4	
-	ArrayList<String> studentPathList = new ArrayList<String>(); // 5
+	//ArrayList<String> studentPathList = new ArrayList<String>(); // 5
+	ArrayList<Student> students; // 5
 	String projectRootFolderName; // 6
-	
+
+
 	ArrayList<String> evaluationResults;
 
 	/**
@@ -28,7 +32,7 @@ public class JavaHomeworkChecker {
 	 *              2: input에 대한 output값이 저장된 파일 
 	 *              3: 컴파일 해야 할 파일의 목록 
 	 *              4: 실행해야 할 fully qualified class name
-	 *              5: 학생들 폴더 목록
+	 *              5: 학생들 github주소
 	 *              6: 프로젝트 root 폴더 이름 e.g., HW2
 	 * @throws Exception
 	 */
@@ -56,18 +60,35 @@ public class JavaHomeworkChecker {
 		// (5) Read class file list
 		fullyQualifiedClassNameThatContainsMainMethod = readFile(args[4]).get(0);
 
-		// (6) Read student path list
-		studentPathList = readFile(args[5]);
-
-		// (7) Project root folder name
+		// (7) Project root folder name. Need to get this info first
 		projectRootFolderName = readFile(args[6]).get(0);
+
+		// (6) Read student path list
+		//studentPathList = readFile(args[5]);
+		students = getStudentInfo(readFile(args[5]));
+
+
+
 
 		evaluationResults = new ArrayList<String>();
 		executeProgram();
-		
+
 		saveResultsInCSVFile();	
 	}
-	
+
+	private ArrayList<Student> getStudentInfo(ArrayList<String> lines) {
+
+		ArrayList<Student> students = new ArrayList<Student>();
+
+		for(String line:lines) {
+			Student student = new Student(line, projectRootFolderName);
+			if(!(student.getGithub().equals("-") || student.getGithub().isEmpty()))
+				students.add(student);
+		}
+
+		return students;
+	}
+
 	ArrayList<String> readFile(String path) throws Exception{
 
 		ArrayList<String> lines = new ArrayList<String>();
@@ -85,37 +106,43 @@ public class JavaHomeworkChecker {
 		return lines;
 
 	}
-	
+
 	ArrayList<Output> readOutputFile(String path) throws Exception{
 		ArrayList<Output> outputList = new ArrayList<Output>();
-		
+
 		ArrayList<String> lines = readFile(path);
 		ArrayList<Integer> ouputDividerIndice = new ArrayList<Integer>();
-		
+
 		for(int i=0; i < lines.size(); i++) {
 			if(lines.get(i).startsWith("%%%%%")) {
 				ouputDividerIndice.add(i);
 			}
 		}
-		
+
 		for(int i=0; i < ouputDividerIndice.size()-1; i++) {
 			outputList.add(new Output(ouputDividerIndice.get(i),ouputDividerIndice.get(i+1),lines));
 		}
-		
+
 		return outputList; 
 	}
 
 	void executeProgram() throws Exception{
 
 		//Execute hw program
-		for(String studentPath:studentPathList) {
-			
-			String classpath = studentPath + "/" + projectRootFolderName;
-			String javaFiles = getJavaFiles(classpath);
-			String javacCommand = "javac -encoding utf-8" + javaFiles; //if we execute this code, this code will modify original class file.
-			
-			System.out.println(javacCommand);
-			runJavacProcess(javacCommand);
+		for(Student student:students) {
+
+			// check git repo is existing for the student.
+			System.out.println("==== " + student.getId() + " " + student.getName() + " is evaluating!");
+			gitClone(student);
+			//gradleBuild(student);
+
+			String classpath = "git/" + student.getId() + "/" + projectRootFolderName +
+					                   "/build/classes/java/main/";
+			//String javaFiles = getJavaFiles(classpath);
+			//String javacCommand = "javac -encoding utf-8" + javaFiles; //if we execute this code, this code will modify original class file.
+
+			//System.out.println(javacCommand);
+			//runJavacProcess(javacCommand);
 
 			for(int i=0; i<testInputList.size();i++) {
 				String javaCommand = "java -cp " + classpath + " "+ 
@@ -123,6 +150,61 @@ public class JavaHomeworkChecker {
 				System.out.println(javaCommand);
 				runJavaProcess(javaCommand,i);
 			}
+		}
+	}
+
+	private void gradleBuild(Student student) {
+		System.out.println("Gradle build! " + student.getId() + " " + student.getName());
+		try {
+			Process pro = Runtime.getRuntime().exec("gradle.bat build -p git" + File.separator + student.getId() + File.separator + projectRootFolderName);
+			String line = null;
+			BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+			while ((line = in.readLine()) != null) {
+				System.out.println(line);
+			}
+			
+			pro.waitFor();
+			if(pro.exitValue() >= 1) {
+				System.err.println(pro.exitValue()+ " GIT CLONE FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
+			}
+
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void gitClone(Student student) {
+
+		// create git directory.
+		File gitDir = new File("git");
+		if(!gitDir.exists()) gitDir.mkdir();
+		try {
+			File studentGitPath = new File(gitDir + File.separator + student.getId() + File.separator + projectRootFolderName);
+
+			if(!studentGitPath.exists()) {
+				Process pro = Runtime.getRuntime().exec("git clone " + student.getGithub() + projectRootFolderName  + " " +
+						"git" + File.separator + 
+						student.getId() + File.separator + 
+						projectRootFolderName);
+				
+				String line = null;
+				BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+				while ((line = in.readLine()) != null) {
+					System.out.println(line);
+				}
+				
+				pro.waitFor();
+				if(pro.exitValue() >= 1) {
+					System.err.println(pro.exitValue()+ " GIT CLONE FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
+				}
+			} else
+				System.out.println("Git already cloned!");
+
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -140,24 +222,24 @@ public class JavaHomeworkChecker {
 		String line = null;
 		BufferedReader in = new BufferedReader(new InputStreamReader(ins));
 		checker:
-		while ((line = in.readLine()) != null) {
-			System.out.println(line);
-			try {
-				if(!line.equals(outputList.get(inputIndex).getOutput().get(idx))) {
-					System.out.println("%%Expected line: " + outputList.get(inputIndex).getOutput().get(idx));
-					//System.out.println("%%Actual line: " + );
-					System.out.println("%%%%%%%%%%%%%%unpassed");
-					storeUnpassed("0TESTCASE FAILED " + command);
-					break checker;
+			while ((line = in.readLine()) != null) {
+				System.out.println(line);
+				try {
+					if(!line.equals(outputList.get(inputIndex).getOutput().get(idx))) {
+						System.out.println("%%Expected line: " + outputList.get(inputIndex).getOutput().get(idx));
+						//System.out.println("%%Actual line: " + );
+						System.out.println("%%%%%%%%%%%%%%unpassed");
+						storeUnpassed("0TESTCASE FAILED " + command);
+						break checker;
+					}
+					idx++;
+				} catch(IndexOutOfBoundsException e) {
+					// got the correct line but there are unnecessary result lines
+					// System.out.println("Exception: " + line);
+					storeUnpassed("0TESTCASE minor issue unnecessary result lines " + command);
 				}
-				idx++;
-			} catch(IndexOutOfBoundsException e) {
-				// got the correct line but there are unnecessary result lines
-				// System.out.println("Exception: " + line);
-				storeUnpassed("0TESTCASE minor issue unnecessary result lines " + command);
+
 			}
-			
-		}
 	}
 
 	private void runJavacProcess(String command) throws Exception {
@@ -167,7 +249,7 @@ public class JavaHomeworkChecker {
 		while ((line = in.readLine()) != null) {
 			System.out.println(line);
 		}
-		
+
 		pro.waitFor();
 		if(pro.exitValue() >= 1) {
 			storeUnpassed(pro.exitValue() + "COMPILE ERROR " + command);
@@ -188,19 +270,19 @@ public class JavaHomeworkChecker {
 	}
 
 	public void storeUnpassed(String drivepath){
-		
+
 		evaluationResults.add(drivepath);
-		
+
 	}
-	
+
 	public void saveResultsInCSVFile()  throws IOException {
 		FileWriter file = new FileWriter(unpassSavedPath+ File.separator + "unpassed.csv", false); 
 		PrintWriter writer = new PrintWriter( file );
-		
+
 		for(String evaluationResult:evaluationResults) {
 			writer.printf( "%s" + "%n" , evaluationResult);
 		}
-		
+
 		writer.close();
 	}
 }
