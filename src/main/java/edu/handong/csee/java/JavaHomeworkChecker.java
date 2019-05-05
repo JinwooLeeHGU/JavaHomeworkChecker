@@ -44,6 +44,8 @@ public class JavaHomeworkChecker {
 	}
 
 	public void run(String[] args) throws Exception {
+		
+		evaluationResults = new ArrayList<String>();
 
 		// (1) Directory path where unpassed.csv file is saved.
 		unpassSavedPath = args[0];
@@ -67,10 +69,6 @@ public class JavaHomeworkChecker {
 		//studentPathList = readFile(args[5]);
 		students = getStudentInfo(readFile(args[5]));
 
-
-
-
-		evaluationResults = new ArrayList<String>();
 		executeProgram();
 
 		saveResultsInCSVFile();	
@@ -84,6 +82,8 @@ public class JavaHomeworkChecker {
 			Student student = new Student(line, projectRootFolderName);
 			if(!(student.getGithub().equals("-") || student.getGithub().isEmpty()))
 				students.add(student);
+			else
+				evaluationResults.add("===No repository: " + student.getId() + " " + student.getName());
 		}
 
 		return students;
@@ -134,7 +134,7 @@ public class JavaHomeworkChecker {
 			// check git repo is existing for the student.
 			System.out.println("==== " + student.getId() + " " + student.getName() + " is evaluating!");
 			gitClone(student);
-			//gradleBuild(student);
+			gradleBuild(student);
 
 			String classpath = "git/" + student.getId() + "/" + projectRootFolderName +
 					                   "/build/classes/java/main/";
@@ -154,19 +154,28 @@ public class JavaHomeworkChecker {
 	}
 
 	private void gradleBuild(Student student) {
-		System.out.println("Gradle build! " + student.getId() + " " + student.getName());
+		System.out.println("Gradle build!! " + student.getId() + " " + student.getName());
 		try {
 			Process pro = Runtime.getRuntime().exec("gradle.bat build -p git" + File.separator + student.getId() + File.separator + projectRootFolderName);
 			String line = null;
-			BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+			
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(pro.getErrorStream()));
 			while ((line = in.readLine()) != null) {
 				System.out.println(line);
 			}
 			
+			in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+			while ((line = in.readLine()) != null) {
+				System.out.println(line);
+			}
+
 			pro.waitFor();
 			if(pro.exitValue() >= 1) {
-				System.err.println(pro.exitValue()+ " GIT CLONE FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
+				System.err.println("!!! " + pro.exitValue()+ " GRADLE BUILD FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
 			}
+			
+			pro.destroy();
 
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -190,15 +199,23 @@ public class JavaHomeworkChecker {
 						projectRootFolderName);
 				
 				String line = null;
-				BufferedReader in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+				
+				BufferedReader in = new BufferedReader(new InputStreamReader(pro.getErrorStream()));
 				while ((line = in.readLine()) != null) {
 					System.out.println(line);
 				}
 				
+				in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
+				while ((line = in.readLine()) != null) {
+					System.out.println(line);
+				}
+
 				pro.waitFor();
 				if(pro.exitValue() >= 1) {
-					System.err.println(pro.exitValue()+ " GIT CLONE FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
+					System.err.println("!!!" + pro.exitValue()+ " GIT CLONE FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
 				}
+				
+				pro.destroy();
 			} else
 				System.out.println("Git already cloned!");
 
@@ -229,14 +246,14 @@ public class JavaHomeworkChecker {
 						System.out.println("%%Expected line: " + outputList.get(inputIndex).getOutput().get(idx));
 						//System.out.println("%%Actual line: " + );
 						System.out.println("%%%%%%%%%%%%%%unpassed");
-						storeUnpassed("0TESTCASE FAILED " + command);
+						storeUnpassed("!!! 0 TEST CASE FAILED " + command);
 						break checker;
 					}
 					idx++;
 				} catch(IndexOutOfBoundsException e) {
 					// got the correct line but there are unnecessary result lines
 					// System.out.println("Exception: " + line);
-					storeUnpassed("0TESTCASE minor issue unnecessary result lines " + command);
+					storeUnpassed("!!! 0 TEST CASE minor issue unnecessary result lines " + command);
 				}
 
 			}
@@ -257,6 +274,8 @@ public class JavaHomeworkChecker {
 		}
 		else
 			System.out.println("Compile successful!! EXIT CODE=" + pro.exitValue());
+		
+		pro.destroy();
 	}
 
 	private void runJavaProcess(String command,int inputIndex) throws Exception {
@@ -265,8 +284,10 @@ public class JavaHomeworkChecker {
 		check(pro.getErrorStream(), command, inputIndex);
 		pro.waitFor();
 		if(pro.exitValue() >= 1) {
-			storeUnpassed(pro.exitValue()+ "TEST CASE FAILED " + command);
+			storeUnpassed("!!! " + pro.exitValue()+ " FAILED by error (e.g., compile error)" + command);
 		}
+		
+		pro.destroy();
 	}
 
 	public void storeUnpassed(String drivepath){
