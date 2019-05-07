@@ -22,7 +22,7 @@ public class JavaHomeworkChecker {
 	//ArrayList<String> studentPathList = new ArrayList<String>(); // 5
 	ArrayList<Student> students; // 5
 	String projectRootFolderName; // 6
-
+	ArrayList<String> latestCommiteDateForStudents = new ArrayList<String>(); //
 
 	ArrayList<String> evaluationResults;
 
@@ -133,7 +133,9 @@ public class JavaHomeworkChecker {
 
 			// check git repo is existing for the student.
 			System.out.println("==== " + student.getId() + " " + student.getName() + " is evaluating!");
+			
 			gitClone(student);
+			generateTheLastCommitDate(student);
 			gradleBuild(student);
 
 			String classpath = "git/" + student.getId() + "/" + projectRootFolderName +
@@ -151,6 +153,11 @@ public class JavaHomeworkChecker {
 				runJavaProcess(javaCommand,i);
 			}
 		}
+	}
+
+	private void generateTheLastCommitDate(Student student) {
+		// git log -1 --format=%cd
+		
 	}
 
 	private void gradleBuild(Student student) {
