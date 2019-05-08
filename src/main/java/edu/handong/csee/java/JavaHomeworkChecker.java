@@ -1,6 +1,7 @@
 package edu.handong.csee.java;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,6 +10,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.Executor;
+import org.apache.commons.exec.PumpStreamHandler;
+
+import edu.handong.csee.java.util.*;
 
 import edu.handong.csee.java.datamodel.Student;
 
@@ -44,7 +52,7 @@ public class JavaHomeworkChecker {
 	}
 
 	public void run(String[] args) throws Exception {
-		
+
 		evaluationResults = new ArrayList<String>();
 
 		// (1) Directory path where unpassed.csv file is saved.
@@ -71,6 +79,7 @@ public class JavaHomeworkChecker {
 
 		executeProgram();
 
+		Util.writeAFile("commitdate.txt", commitDate);
 		saveResultsInCSVFile();	
 	}
 
@@ -133,13 +142,13 @@ public class JavaHomeworkChecker {
 
 			// check git repo is existing for the student.
 			System.out.println("==== " + student.getId() + " " + student.getName() + " is evaluating!");
-			
+
 			gitClone(student);
 			generateTheLastCommitDate(student);
 			gradleBuild(student);
 
 			String classpath = "git/" + student.getId() + "/" + projectRootFolderName +
-					                   "/build/classes/java/main/";
+					"/build/classes/java/main/";
 			//String javaFiles = getJavaFiles(classpath);
 			//String javacCommand = "javac -encoding utf-8" + javaFiles; //if we execute this code, this code will modify original class file.
 
@@ -155,9 +164,26 @@ public class JavaHomeworkChecker {
 		}
 	}
 
+	ArrayList<String> commitDate = new ArrayList<String>();
 	private void generateTheLastCommitDate(Student student) {
+
 		// git log -1 --format=%cd
-		
+		try {
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+			Executor exec = new DefaultExecutor();
+			exec.setStreamHandler(streamHandler);
+			exec.setWorkingDirectory(new File("git/" + student.getId() + "/" + projectRootFolderName));
+			CommandLine cl = CommandLine.parse("git log -1 --format=%cd");
+			int exitvalue = exec.execute(cl);
+			commitDate.add(student.getId() + "," + student.getName() + "," + outputStream.toString());
+			
+			outputStream.close();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void gradleBuild(Student student) {
@@ -165,13 +191,13 @@ public class JavaHomeworkChecker {
 		try {
 			Process pro = Runtime.getRuntime().exec("gradle.bat build -p git" + File.separator + student.getId() + File.separator + projectRootFolderName);
 			String line = null;
-			
-			
+
+
 			BufferedReader in = new BufferedReader(new InputStreamReader(pro.getErrorStream()));
 			while ((line = in.readLine()) != null) {
 				System.out.println(line);
 			}
-			
+
 			in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
 			while ((line = in.readLine()) != null) {
 				System.out.println(line);
@@ -181,7 +207,7 @@ public class JavaHomeworkChecker {
 			if(pro.exitValue() >= 1) {
 				System.err.println("!!! " + pro.exitValue()+ " GRADLE BUILD FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
 			}
-			
+
 			pro.destroy();
 
 		} catch (IOException | InterruptedException e) {
@@ -204,14 +230,14 @@ public class JavaHomeworkChecker {
 						"git" + File.separator + 
 						student.getId() + File.separator + 
 						projectRootFolderName);
-				
+
 				String line = null;
-				
+
 				BufferedReader in = new BufferedReader(new InputStreamReader(pro.getErrorStream()));
 				while ((line = in.readLine()) != null) {
 					System.out.println(line);
 				}
-				
+
 				in = new BufferedReader(new InputStreamReader(pro.getInputStream()));
 				while ((line = in.readLine()) != null) {
 					System.out.println(line);
@@ -221,7 +247,7 @@ public class JavaHomeworkChecker {
 				if(pro.exitValue() >= 1) {
 					System.err.println("!!!" + pro.exitValue()+ " GIT CLONE FAILED " + student.getGithub() + " " + student.getName() + " " + student.getGithub() + projectRootFolderName);
 				}
-				
+
 				pro.destroy();
 			} else
 				System.out.println("Git already cloned!");
@@ -281,7 +307,7 @@ public class JavaHomeworkChecker {
 		}
 		else
 			System.out.println("Compile successful!! EXIT CODE=" + pro.exitValue());
-		
+
 		pro.destroy();
 	}
 
@@ -293,7 +319,7 @@ public class JavaHomeworkChecker {
 		if(pro.exitValue() >= 1) {
 			storeUnpassed("!!! " + pro.exitValue()+ " FAILED by error (e.g., compile error)" + command);
 		}
-		
+
 		pro.destroy();
 	}
 
